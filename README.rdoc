@@ -1,28 +1,71 @@
-== README
+== To reproduce
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+==== setup the project (or just clone this)
 
-Things you may want to cover:
+    rails new emptytest/
 
-* Ruby version
+add reform to Gemfile
 
-* System dependencies
+    rails g model song title:string
+    rails g model label city:string
+    rake db:migrate
+    mkdir app/forms
+    mkdir test/forms
+    
+add these files
 
-* Configuration
+==== app/forms/empty_with_composition.rb
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+  class EmptyWithComposition < Reform::Form
+    include Composition
+    property :title, on: :song
+    property :city,  on: :label
+    property :empty_thing, :empty => true
+  end
 
 
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+
+==== test/forms/empty_with_composition_test.rb 
+
+  require 'test_helper'
+
+  class EmptyWithCompositionTest < ActiveSupport::TestCase
+    
+    test "should be ok with empty thing" do 
+    	form = EmptyWithComposition.new(song: Song.new, label: Label.new)
+    	validation = form.validate(
+    		"title" => "my title",
+    		"city" => "my cool city",
+    		"empty_thing" => "empty"
+      )
+    	assert validation
+    end
+  end
+
+==== run the test
+
+   rake test test/forms/empty_with_composition_test.rb 
+
+==== see error
+
+   Run options: --seed 708
+   
+   # Running tests:
+   
+   E
+   
+   Finished tests in 0.035624s, 28.0708 tests/s, 0.0000 assertions/s.
+   
+     1) Error:
+   EmptyWithCompositionTest#test_should_be_ok_with_empty_thing:
+   SyntaxError: /home/agross/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/forwardable.rb:169: syntax error, unexpected *
+         def (*args, &block)
+               ^
+   /home/agross/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/forwardable.rb:169: syntax error, unexpected &
+         def (*args, &block)
+                      ^
+       app/forms/empty_with_composition.rb:5:in `<class:EmptyWithComposition>'
+       app/forms/empty_with_composition.rb:1:in `<top (required)>'
+       test/forms/empty_with_composition_test.rb:6:in `block in <class:EmptyWithCompositionTest>'
+   
+   1 tests, 0 assertions, 0 failures, 1 errors, 0 skips
