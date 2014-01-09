@@ -6,6 +6,7 @@
 
 add reform to Gemfile
 
+    bundle
     rails g model song title:string
     rails g model label city:string
     rake db:migrate
